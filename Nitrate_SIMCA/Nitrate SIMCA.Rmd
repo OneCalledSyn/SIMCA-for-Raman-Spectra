@@ -1,0 +1,137 @@
+---
+title: "Exploratory Nitrate SIMCA"
+author: "Jay Shapiro"
+date: "1/9/2020"
+output: 
+  html_document:
+    theme: cerulean
+  pdf_document: default  
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+<br><br>
+
+## Introduction
+
+<br><br>
+
+**Soft independent modelling of class analogies** (SIMCA) is a supervised classification technique that is commonly used in fields such as chemometrics and spectroscopy. One of the noteworthy aspects of SIMCA is that samples can be identified as belonging to multiple classes, which is what the word "soft" references. For each class of samples, run PCA on the observations for dimensionality reduction purposes. Each modeled class will be described by a **flat affine n-dimensional subspace**, with n being the number of principal components in the model. For a single principal component, model the class using a line; for two principal components, model the class using a plane. For three or more principal components, the class model is going to be a hyperplane. Next, calculate the mean **orthogonal distance** (OD) from the training set to the flat affine n-dimensional subspace and use that number to determine the threshold for classification, called the **critical distance**, which is found with the F-distribution. Now that each class has a dimensionally reduced model and a classification threshold, new observations may be tested against the classifier model. 
+
+<br><br>
+
+### Exploration
+
+<br><br>
+
+In this exploration, I will use spectra collected from a sample of calcium nitrate and a sample of magnesium nitrate using a NanoRam 785 nm device. One of the first things we can do after building the SIMCA model is use the summary() function in R to receive some enlightening statistics about the class model for calcium nitrate: 
+
+<br><br>
+
+```{r echo = FALSE, warning = FALSE, message = FALSE}
+library(tidyverse)
+library(ggplot2)
+library(plotly)
+library(plyr)
+library(data.table)
+library(readr)
+library(dplyr)
+library(ggfortify)
+library(factoextra)
+library(mdatools)
+
+
+
+#Grab the file names of the 20 spectra for 785nm measured Calcium Nitrate
+myfiles <- list.files(path = "C:/Users/jays/Desktop/Converted_Spectra/785/Ca_Nitrate", 
+                      pattern = "*.txt", full.names = TRUE)
+
+#Instantiate an empty data frame to jam the raw data into
+ca_nitrate_785 <- data.frame()
+
+#Loop through the files to build one dataframe
+for (lambda in c(1:20)) {
+  location <- myfiles[lambda]
+  temp <- fread(file = location, 
+                sep = ";", fill = TRUE, header = TRUE) %>% select(`Dark Subtracted`)
+  
+  temp <- transpose(temp)
+  
+  ca_nitrate_785[lambda, 1:582] <- temp
+}
+
+#Instantiate an empty data frame to jam the raw data into
+mg_nitrate_785 <- data.frame()
+
+#Repeat above steps for the 20 spectra of 785nm measured Magnesium Nitrate
+myfiles <- list.files(path = "C:/Users/jays/Desktop/Converted_Spectra/785/Mg_Nitrate", 
+                      pattern = "*.txt", full.names = TRUE)
+
+#Loop through the files
+for (lambda in c(1:20)) {
+  location <- myfiles[lambda]
+  temp <- fread(file = location, 
+                sep = ";", fill = TRUE, header = TRUE) %>% select(`Dark Subtracted`)
+  
+  temp <- transpose(temp)
+  
+  mg_nitrate_785[lambda, 1:582] <- temp
+}
+
+ca_calibration <- ca_nitrate_785[5:20, ]
+mg_calibration <- mg_nitrate_785[5:20, ]
+
+#Slap on an identification column
+ca_nitrate_785 <- ca_nitrate_785 %>% mutate(compound = "ca")
+mg_nitrate_785 <- mg_nitrate_785 %>% mutate(compound = "mg")
+
+#Create a master dataframe of all 40 spectra
+all_785_spectra <- rbind(ca_nitrate_785, mg_nitrate_785)
+
+#Remove outlier
+all_785_spectra <- all_785_spectra[-c(24), ]
+
+ca_model <- simca(ca_calibration, 'calcium nitrate', ncomp = 3, cv = 1, center = TRUE, scale = TRUE)
+
+summary(ca_model)
+```
+
+<br><br>
+
+Next, we can call the very simple plot() function on the calcium nitrate model object and get several informative statistics: 
+
+<br><br>
+
+```{r echo = FALSE, warning = FALSE, message = FALSE}
+plot(ca_model)
+```
+
+<br><br>
+
+In terms of PCA, the **scores** (also called **factor scores** or **component scores**) are the transformed variable values corresponding to particular data points. Another way to describe score is *the distance between the point an observation is projected onto the principal component axis and the origin*. 
+
+<br><br>
+
+**Modelling power** shows the amount each variable contributes to the variation described by the principal components. The default representation in plot() is cluttered by each variable name being displayed over the vertical bars because there are so many variables in spectral data.
+
+<br><br>
+
+**Squared residual distance** (Q) and **Hotelling's T-squared** are summary statistics typically used in factor-based models, which explain how well a model describes a given observation and assist with outlier detection.  
+
+<br><br>
+
+Q residual uses the sum of squares of each observation in the error matrix, which means the Q residual measures the difference between an observation and its projection into the space defined by the principal component eigenvectors.
+
+<br><br>
+
+Hotelling's T-squared statistic uses the sum of normalized squared scores, which means it measures the variation within each observation in the PCA class model. Therefore, T-squared gives the distance between the projection of the observation onto the principal component eigenvectors and the multivariate mean.
+
+<br><br>
+
+In summary, Q residuals demonstrate the magnitude of variation left in each observation after the observation is projected through the model, while Hotelling's T-squared represent the distance each observation is from the center of the class model (scores = 0).
+
+<br><br>
+
+The cumulative variance plot is fairly straightforward; it shows the total percentage of the variation in the data that is explained using increasing numbers of principal components.

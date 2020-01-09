@@ -62,8 +62,9 @@ all_785_spectra <- rbind(ca_nitrate_785, mg_nitrate_785)
 all_785_spectra <- all_785_spectra[-c(24), ]
 
 ca_model <- simca(ca_calibration, 'calcium nitrate', ncomp = 3, cv = 1, center = TRUE, scale = TRUE)
-summary(ca_model)
+
 plot(ca_model)
+summary(ca_model)
 
 plotme_ca <- data.frame(ca_model$calres$scores)
 
@@ -76,8 +77,9 @@ caplotly <- plot_ly(data = plotme_ca, x = ~Comp.1, y = ~Comp.2, z = ~Comp.3) %>%
 caplotly
 
 mg_model <- simca(mg_calibration, 'magnesium nitrate', ncomp = 3, cv = 1, center = TRUE, scale = TRUE)
-summary(mg_model)
+
 plot(mg_model)
+summary(mg_model)
 
 plotme_mg <- data.frame(mg_model$calres$scores)
 
@@ -94,19 +96,6 @@ summary(nitrates)
 plot(nitrates)
 plotCooman(nitrates)
 plotResiduals(nitrates)
-plotModelDistance(nitrates)
 plotDiscriminationPower(nitrates)
-plotModellingPower(nitrates)
-
-res <- predict(nitrates, test_set, test_set.cref)
-
-
-#plotme_nitrates <- data.frame(nitrates$calres$)
-
-#nitplotly <- plot_ly(data = plotme_nitrates, x = ~Comp.1, y = ~Comp.2, z = ~Comp.3) %>%
-#  add_markers() %>%
-#  layout(scene = list(xaxis = list(title = 'Comp 1'),
-#                      yaxis = list(title = 'Comp 2'),
-#                      zaxis = list(title = 'Comp 3')))
-
-#nitplotly
+#plotModellingPower(nitrates)
+#plotModelDistance(nitrates)
