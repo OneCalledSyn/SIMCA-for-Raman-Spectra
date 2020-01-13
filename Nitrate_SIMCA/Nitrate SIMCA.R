@@ -49,11 +49,17 @@ for (lambda in c(1:20)) {
 }
 
 ca_calibration <- ca_nitrate_785[5:20, ]
-mg_calibration <- mg_nitrate_785[5:20, ]
+mg_calibration <- mg_nitrate_785[5:20, ] 
+
+ca_test <- ca_nitrate_785[1:4, ]
+mg_test <- mg_nitrate_785[1:4, ]
 
 #Slap on an identification column
 ca_nitrate_785 <- ca_nitrate_785 %>% mutate(compound = "ca")
 mg_nitrate_785 <- mg_nitrate_785 %>% mutate(compound = "mg")
+
+ca_test <- ca_test %>% mutate(compound = "ca")
+mg_test <- mg_test %>% mutate(compound = "mg")
 
 #Create a master dataframe of all 40 spectra
 all_785_spectra <- rbind(ca_nitrate_785, mg_nitrate_785)
@@ -70,9 +76,9 @@ plotme_ca <- data.frame(ca_model$calres$scores)
 
 caplotly <- plot_ly(data = plotme_ca, x = ~Comp.1, y = ~Comp.2, z = ~Comp.3) %>%
   add_markers() %>%
-  layout(scene = list(xaxis = list(title = 'Comp 1'),
-                      yaxis = list(title = 'Comp 2'),
-                      zaxis = list(title = 'Comp 3')))
+  layout(scene = list(xaxis = list(title = 'PC 1'),
+                      yaxis = list(title = 'PC 2'),
+                      zaxis = list(title = 'PC 3')))
 
 caplotly
 
@@ -85,9 +91,9 @@ plotme_mg <- data.frame(mg_model$calres$scores)
 
 mgplotly <- plot_ly(data = plotme_mg, x = ~Comp.1, y = ~Comp.2, z = ~Comp.3) %>%
   add_markers() %>%
-  layout(scene = list(xaxis = list(title = 'Comp 1'),
-                      yaxis = list(title = 'Comp 2'),
-                      zaxis = list(title = 'Comp 3')))
+  layout(scene = list(xaxis = list(title = 'PC 1'),
+                      yaxis = list(title = 'PC 2'),
+                      zaxis = list(title = 'PC 3')))
 
 mgplotly
 
@@ -95,7 +101,17 @@ nitrates <- simcam(models = list(ca_model, mg_model), info = 'Nitrate SIMCA')
 summary(nitrates)
 plot(nitrates)
 plotCooman(nitrates)
-plotResiduals(nitrates)
 plotDiscriminationPower(nitrates)
-#plotModellingPower(nitrates)
-#plotModelDistance(nitrates)
+
+nitrate_calibration <- rbind(ca_calibration, mg_calibration)
+nitrate_test <- rbind(ca_test, mg_test)
+
+results <- predict(nitrates, nitrate_calibration)
+plotPredictions(results, main = "Calibration Set Predictions", xlab = "Observation #", ylab = "Predicted Class", 
+                color = nitrate_calibration$compound)
+
+results2 <- predict(nitrates, nitrate_test)
+plotPredictions(results2, main = "Test Set Predictions", xlab = "Observation #", ylab = "Predicted Class",
+                color = nitrate_test$compound)
+
+getConfusionMatrix(nitrates$calres)
