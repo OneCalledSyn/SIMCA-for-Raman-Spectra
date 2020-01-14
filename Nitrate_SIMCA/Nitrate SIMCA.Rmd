@@ -14,7 +14,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 <br><br>
 
-Topic: How can B&W Tek LLC improve its proprietary chemometric modeling software, BWIQ, so that SIMCA models share more information with end customers both analyticall and graphically?
+Topic: How can B&W Tek LLC improve its proprietary chemometric modeling software, BWIQ, so that SIMCA models share more analytic and graphical information with end customers?
 
 <br><br>
 
@@ -22,7 +22,7 @@ Topic: How can B&W Tek LLC improve its proprietary chemometric modeling software
 
 <br><br>
 
-**Soft independent modelling of class analogies** (SIMCA) is a supervised classification technique that is commonly used in fields such as chemometrics and spectroscopy. One of the noteworthy aspects of SIMCA is that samples can be identified as belonging to multiple classes, which is what the word "soft" references. For each class of samples, run PCA on the observations for dimensionality reduction purposes. Each modeled class will be described by a **flat affine n-dimensional subspace**, with n being the number of principal components in the model. For a single principal component, model the class using a line; for two principal components, model the class using a plane. For three or more principal components, the class model is going to be a hyperplane. Next, calculate the mean **orthogonal distance** (OD) from the training set to the flat affine n-dimensional subspace and use that number to determine the threshold for classification, called the **critical distance**, which is found with the F-distribution. Now that each class has a dimensionally reduced model and a classification threshold, new observations may be tested against the classifier model. 
+**Soft independent modeling of class analogies** (SIMCA) is a commonly used supervised classification technique in fields such as chemometrics and spectroscopy. The phrase "soft" refers to the ability to place an observation into multiple classes during classification. To build a SIMCA model, implement PCA for each class to obtain a reduced dimension representation. An **affine n-dimensional subspace** represents each class with n principal components. Next, calculate the mean orthogonal distance (OD) between the training data and the subspace; utilize the mean OD to determine the critical distance. Now that each class has a dimensionally reduced model and a classification threshold, one can test new observations against the classifier model.
 
 <br><br>
 
@@ -30,7 +30,7 @@ Topic: How can B&W Tek LLC improve its proprietary chemometric modeling software
 
 <br><br>
 
-The current iteration of BWIQ only gives the end user an accuracy value and a barebones plot after building a SIMCA model. In this exploration, I will employ and explain several analytical and graphical techniques that convey valubale information about the SIMCA model using spectra collected from a sample of calcium nitrate and a sample of magnesium nitrate with a NanoRam 785 nm device. One of the first things we can do after building the SIMCA model is use the summary() function in R to receive some enlightening statistics about the class model for calcium nitrate: 
+The current iteration of BWIQ only gives the end user an accuracy value and a barebones plot after building a SIMCA model. In this exploration, I will employ and explain several analytical and graphical techniques that convey valuable information about the SIMCA model using spectra collected from a sample of calcium nitrate and a sample of magnesium nitrate with a NanoRam 785 nm device. One of the first things we can do after building the SIMCA model is to use the summary() function in R to receive some enlightening statistics about the class model for calcium nitrate: 
 
 <br><br>
 
@@ -104,7 +104,7 @@ summary(ca_model)
 
 <br><br>
 
-Next, we can call the very simple plot() function on the calcium nitrate model object and get several informative statistics: 
+Next, we call the plot() function with the calcium nitrate model object as the argument to get several informative statistics: 
 
 <br><br>
 
@@ -114,21 +114,21 @@ plot(ca_model)
 
 <br><br>
 
-In terms of SIMCA, the **scores** (also called **factor scores** or **component scores**) are the transformed variable values corresponding to particular data points. Another way to describe score is *the distance between the point an observation is projected onto the principal component axis and the origin*. 
+In terms of SIMCA, the **scores** (also called **factor scores** or **component scores**) are the transformed variable values corresponding to particular data points. Another way to describe score is *the distance between the projection of the observation onto the principal component axis and the origin*. 
 
 <br><br>
 
-**Modelling power** shows the amount each variable contributes to the variation described by the principal components. The default representation in plot() is cluttered by each variable name being displayed over the vertical bars because there are so many variables in spectral data.
+**Modeling power** shows the amount each variable contributes to the variation described by the principal components. The default representation in the plot() function displays each variable name over the vertical bars, causing clutter when there are so many variables, as in spectral data.
 
 <br><br>
 
-**Squared residual distance** (Q) and **Hotelling's T-squared** are summary statistics typically used in factor-based models, which explain how well a model describes a given observation and assist with outlier detection. Q residual uses the sum of squares of each observation in the error matrix, which means the Q residual measures the difference between an observation and its projection into the space defined by the principal component eigenvectors. For the ith observation, calculate the Q residual using the following formula, where $e_i$ is the ith row of the error matrix E:
+**Squared residual distance** (Q) and **Hotelling's T-squared** are summary statistics typically used in factor-based models, which quantify how well a model describes a given observation and detect outliers. Q residual uses the sum of squares of each observation in the error matrix, which means that the Q residual measures the difference between an observation and its projection into the space defined by the principal component eigenvectors. For the ith observation, calculate the Q residual using the following formula, where $e_i$ is the ith row of the error matrix E:
 
 <br><br>
 
 $$Q_i = e_ie_i^T$$
 
-Hotelling's T-squared statistic uses the sum of normalized squared scores, which means it measures the variation within each observation in the PCA class model. Therefore, T-squared gives the distance between the projection of the observation onto the principal component eigenvectors and the multivariate mean. The Hotelling distribution is as follows, where S is the sample covariance matrix:
+Hotelling's T-squared statistic uses the sum of normalized squared scores, which means it measures the variation within each observation in the PCA class model. Hotelling's T-squared gives the distance between the projection of the observation onto the principal component eigenvectors and the multivariate mean. The Hotelling distribution is as follows, where S is the sample covariance matrix:
 
 <br><br>
 
@@ -136,11 +136,11 @@ $$T^2 = (\bar{x} - \mu_0)^T S^{-1} (\bar{x} - \mu_0)$$
 
 <br><br>
 
-In summary, Q residuals demonstrate the magnitude of variation left in each observation after the observation is projected through the model, while Hotelling's T-squared represent the distance each observation is from the center of the class model (scores = 0).
+In summary, Q residuals demonstrate the magnitude of variation left in each observation after the observation is projected through the model, while Hotelling's T-squared represents the distance each observation is from the center of the class model (scores = 0).
 
 <br><br>
 
-The cumulative variance plot is fairly straightforward; it shows the total percentage of the variation in the data that is explained using increasing numbers of principal components.
+The cumulative variance plot is fairly straightforward; it shows the total percentage of the variation in the data explained by different numbers of principal components.
 
 <br><br>
 
@@ -161,7 +161,7 @@ caplotly <- plot_ly(data = plotme_ca, x = ~Comp.1, y = ~Comp.2, z = ~Comp.3) %>%
 caplotly
 ```
 
-Now we must do the same steps for the magnesium nitrate class model:
+Now we repeat identical steps for the magnesium nitrate class model:
 
 <br><br>
 
@@ -195,7 +195,7 @@ nitrates <- simcam(models = list(ca_model, mg_model), info = 'Nitrate SIMCA')
 
 <br><br>
 
-Again, we will run the summary() function to get a cursory look at our model object:
+Again, we call the summary() function to get a cursory look at our model object:
 
 ```{r message = FALSE, warning = FALSE}
 summary(nitrates)
@@ -203,7 +203,7 @@ summary(nitrates)
 
 <br><br>
 
-We can see that taking a summary of the simcam model object basically just pastes the summaries from the individual SIMCA model classes together. There isn't much information gained, but it does offer utility in the organizational sector. A **Cooman's plot** is a common way to graphically display the results for SIMCA. Cooman's plots do pairwise comparison of the SIMCA classes by examining the distance from each observation in one class to the model of the other class. The plot is broken up into four regions with each region having a distinct meaning. Observations which are judged to belong to either of the two classes but not both classes fall in either the top left or the bottom right sectors, depending on which class they are determined to be in. Observations which are determined to fall into both classes will be in the bottom left sector, and observations which don't belong to either class will appear in the top right sector.
+Enacting the summary() function on the simcam model object pastes the summaries from the individual SIMCA model classes together.  A **Cooman's plot** graphically displays the results for SIMCA by using a pairwise comparison of the classes, which checks the distance between each observation in one class and the model of the other class. Cooman's plot has four regions with distinct meanings: Observations that belong to a single class fall in either the top left or the bottom right sectors, "soft" observations that fall into both classes are in the bottom left sector, and observations that belong to neither class are in the top right sector.
 
 <br><br>
 
@@ -213,9 +213,9 @@ plotCooman(nitrates)
 
 <br><br>
 
-Cooman's plots are fairly useful for a small number of SIMCA classes, but it's important to keep in mind that the number of plots required to examine all class pairings grows in quadratic time. Examining n SIMCA classes in such a manner will require $\frac{n(n-1)}{2}$ Cooman's plots. For situations where there are many classes to examine, it will be prohibitively difficult to examine the myriad plots in a reasonable amount of time.
+Cooman's plots are a wonderful tool for a small number of SIMCA classes, but the number of plots required to examine all class pairings grows in quadratic time. Examining n SIMCA classes using Cooman's plots requires $\frac{n(n-1)}{2}$ plots. Examining plots in a reasonable amount of time becomes prohibitively difficult for models with many classes to examine.
 
-The discrimination power plot tells us which variables in the observations contributed the most to separating the classes. Since the observations are spectral data, the discrimination power should be the greatest for the variables which are pixels of the main peaks of the Raman spectra. Similarly, discrimination power plots are created pair-wise between two classes at a time, so the number of plots will again grow quadratically as the number of classes increases.
+The discrimination power plot depicts how variables in the observations contribute to class separation. Since the observations are spectral data, the discrimination power is the greatest for the variables that are pixels of the main Raman spectral peaks. Discrimination power plots are also created pairwise between two classes at a time, so the number of plots will again grow quadratically as the number of classes increases.
 
 ```{r echo = FALSE, message = FALSE, warning = FALSE}
 plotDiscriminationPower(nitrates, ylab = "Power", xlab = "Variable")
@@ -246,7 +246,7 @@ We can also do the same thing with the test set to get predictions against data 
 
 <br><br>
 
-A confusion matrix is another useful tool for letting a user know about the performance of their classification model, giving the number of false positives, false negatives, true positives, and true negatives. From these results, one can calculate several other measures of model performance such as sensitivity, specificity, F1 score, and accuracy. Here is an example of a confusion matrix for the calibration set: 
+A confusion matrix is another useful tool for letting a user know about the performance of their classification model. Confusion matrices give the number of false positives, false negatives, true positives, and true negatives from testing expected outcomes against labeled data.  Using FP/FN/TP/TN, calculate several other measures of model performance such as sensitivity, specificity, F1 score, and accuracy. Here is an example of a confusion matrix for the calibration set: 
 
 <br><br>
 
@@ -256,7 +256,7 @@ getConfusionMatrix(nitrates$calres)
 
 <br><br>
 
-A user could see that all of the samples were correctly identified as either a true positive or a true negative and that there were no misclassifications in this case.
+Correct identification of all samples as either true positive or true negative indicates no misclassifications.
 
 <br><br>
 
@@ -264,7 +264,7 @@ A user could see that all of the samples were correctly identified as either a t
 
 <br><br>
 
-The methods which I have outlined in this overview should be sufficient to satisfy the needs of both customers and internal employees alike. I highly recommend adding the plots and analytics discussed in this reprt to the BWIQ software. 
+The methods which I have outlined in this overview should be sufficient to satisfy the needs of both customers and internal employees alike. I highly recommend adding the plots and analytics discussed in this report to the BWIQ software. 
 
 <br><br>
 

@@ -1,0 +1,10 @@
+name: Publish Document
+title:
+username:
+account: rpubs
+server: rpubs.com
+hostUrl: rpubs.com
+appId: https://api.rpubs.com/api/v1/document/565739/dc697bc698014c679e51bdf427adc69a
+bundleId: https://api.rpubs.com/api/v1/document/565739/dc697bc698014c679e51bdf427adc69a
+url: http://rpubs.com/OneCalledSyn/565739
+when: 1579018360.13614
